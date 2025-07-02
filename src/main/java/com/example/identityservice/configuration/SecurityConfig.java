@@ -33,13 +33,18 @@ public class SecurityConfig {
             "/auth/log-in",
             "/auth/introspect",
             "/auth/refresh",
-            "/auth/logout"
+            "/auth/logout",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**",
+            "/v1/api-docs/**"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request ->
                         request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated()
+                                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v1/api-docs/**").permitAll()
+                                .anyRequest().authenticated()
         );
 
         httpSecurity.oauth2ResourceServer(oauth2 ->

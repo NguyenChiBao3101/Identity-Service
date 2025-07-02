@@ -14,11 +14,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PermissionService {
-    @Autowired
-    private PermissionRepository permissionRepository;
+    private final PermissionRepository permissionRepository;
 
-    @Autowired
-    private PermissionMapper mapper;
+    private final PermissionMapper mapper;
     public PermissionResponse createPermission(PermissionRequest request) {
         Permission permission = mapper.toPermission(request);
         permission = permissionRepository.save(permission);
