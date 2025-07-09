@@ -7,6 +7,7 @@ import com.example.identityservice.mapper.PermissionMapper;
 import com.example.identityservice.repository.PermissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,17 +18,18 @@ public class PermissionService {
     private final PermissionRepository permissionRepository;
 
     private final PermissionMapper mapper;
+    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public PermissionResponse createPermission(PermissionRequest request) {
         Permission permission = mapper.toPermission(request);
         permission = permissionRepository.save(permission);
         return mapper.toPermissionResponse(permission);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public List<PermissionResponse> getAllPermission() {
         var permissions = permissionRepository.findAll();
          return permissions.stream().map(mapper::toPermissionResponse).toList();
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     public void deletePermission(String permission) {
         permissionRepository.deleteById(permission);
     }

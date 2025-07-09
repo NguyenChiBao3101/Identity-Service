@@ -1,5 +1,20 @@
 package com.example.identityservice.service;
 
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.StringJoiner;
+import java.util.UUID;
+
+import com.example.identityservice.entity.IssuedToken;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.example.identityservice.Exception.AuthorizationDeniedException;
 import com.example.identityservice.Exception.NotFoundException;
 import com.example.identityservice.dto.request.AuthenticationRequest;
@@ -11,28 +26,22 @@ import com.example.identityservice.dto.response.IntrospectResponse;
 import com.example.identityservice.entity.InvalidatedToken;
 import com.example.identityservice.entity.User;
 import com.example.identityservice.repository.InvalidatedTokenRepository;
+import com.example.identityservice.repository.IssuedTokenRepository;
 import com.example.identityservice.repository.UserRepository;
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.text.ParseException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.StringJoiner;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +52,9 @@ public class AuthenticationService {
 
     @Autowired
     private InvalidatedTokenRepository invalidatedTokenRepository;
+
+    @Autowired
+    private IssuedTokenRepository issuedTokenRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -80,7 +92,19 @@ public class AuthenticationService {
 
         try {
             jwsObject.sign(new MACSigner(signerKey.getBytes()));
-            return jwsObject.serialize();
+            String token = jwsObject.serialize();
+            // Save issued token
+            String jit = jwtClaimsSet.getJWTID();
+            String username = jwtClaimsSet.getSubject();
+            Date expiryTime = jwtClaimsSet.getExpirationTime();
+
+            IssuedToken issuedToken = IssuedToken.builder()
+                    .id(jit)
+                    .username(username)
+                    .expiryTime(expiryTime)
+                    .build();
+            issuedTokenRepository.save(issuedToken);
+            return token;
         } catch (JOSEException e) {
             throw new RuntimeException(e);
         }
@@ -132,7 +156,7 @@ public class AuthenticationService {
         return signedJWT;
     }
 
-    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+    public Boolean logout(LogoutRequest request) throws ParseException, JOSEException {
         try {
             var signToken = verifyToken(request.getToken(), true);
 
@@ -144,8 +168,10 @@ public class AuthenticationService {
                     .expiryTime(expiryTime)
                     .build();
             invalidatedTokenRepository.save(invalidatedToken);
-        } catch (RuntimeException exception){
+            return true;
+        } catch (RuntimeException exception) {
             log.info("Token already expired");
+            return false;
         }
     }
 

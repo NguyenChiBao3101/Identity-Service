@@ -1,24 +1,35 @@
 package com.example.identityservice.service;
 
-import com.example.identityservice.Exception.NotFoundException;
-import com.example.identityservice.dto.request.UserCreationRequest;
-import com.example.identityservice.dto.request.UserUpdateRequest;
-import com.example.identityservice.dto.response.UserResponse;
-import com.example.identityservice.entity.User;
-import com.example.identityservice.enums.Roles;
-import com.example.identityservice.mapper.UserMapper;
-import com.example.identityservice.repository.RoleRepository;
-import com.example.identityservice.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
+import com.example.identityservice.Exception.NotFoundException;
+import com.example.identityservice.dto.request.UserCreationRequest;
+import com.example.identityservice.dto.request.UserRoleUpdateRequest;
+import com.example.identityservice.dto.request.UserUpdateRequest;
+import com.example.identityservice.dto.response.UserCreationResponse;
+import com.example.identityservice.dto.response.UserResponse;
+import com.example.identityservice.dto.response.UserUpdateResponse;
+import com.example.identityservice.entity.Role;
+import com.example.identityservice.entity.User;
+import com.example.identityservice.enums.Roles;
+import com.example.identityservice.mapper.UserMapper;
+import com.example.identityservice.repository.InvalidatedTokenRepository;
+import com.example.identityservice.repository.IssuedTokenRepository;
+import com.example.identityservice.repository.RoleRepository;
+import com.example.identityservice.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +47,13 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private IssuedTokenRepository issuedTokenRepository;
+    @Autowired
+    private InvalidatedTokenRepository invalidatedTokenRepository;
+
     //create new user
-    public UserResponse createNewUser(UserCreationRequest request) {
+    public UserCreationResponse createNewUser(UserCreationRequest request) {
         if(userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username is existed");
         }
@@ -45,11 +61,13 @@ public class UserService {
         // encrypt password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // set roles
-        HashSet<String> roles = new HashSet<>();
-        roles.add(Roles.USER.name());
-        //user.setRoles(roles);
-        return  userMapper.toUserResponse(userRepository.save(user));
+        // set default role: USER
+        Role userRole = roleRepository.findById(Roles.USER.name())
+                .orElseThrow(() -> new RuntimeException("Default role USER not found"));
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+        user.setRoles(roles);
+        return  userMapper.toUserCreationResponse(userRepository.save(user));
     }
 
     //get all users
@@ -61,7 +79,7 @@ public class UserService {
 
     //get user by userId
 
-    @PostAuthorize("returnObject.username == authentication.name")
+    @PreAuthorize("hasRole('ADMIN')")
     public User getUserById(long id) {
         log.info("Access getUserById method successfully!!");
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
@@ -75,30 +93,65 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found")));
     }
 
-    //update user by username
-    //@PostAuthorize("returnObject.username == authentication.name")
-    public UserResponse updateUser(UserUpdateRequest request, String username) {
+    // User update theirs own info by username
+    @PostAuthorize("returnObject.username == authentication.name")
+    public UserUpdateResponse updateUser(UserUpdateRequest request, String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
         //update user
         userMapper.updateUser(user,request);
         //encrypt updated password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        return  userMapper.toUserUpdateResponse(userRepository.save(user));
+    }
 
-        var roles = roleRepository.findAllById(request.getRoles());
-        user.setRoles(new HashSet<>(roles));
-        return  userMapper.toUserResponse(userRepository.save(user));
+    // admin update user role
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse updateUserRoles(String username, UserRoleUpdateRequest request) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        // Lấy roles từ DB
+        Set<Role> roles = request.getRoles().stream()
+                .map(roleName -> roleRepository.findById(roleName)
+                        .orElseThrow(() -> new NotFoundException("Role not found: " + roleName)))
+                .collect(Collectors.toSet());
+        user.setRoles(roles);
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     //delete user
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public UserResponse deleteUserByUsername(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
+        // Invalidate all tokens
+        var issuedTokens = issuedTokenRepository.findByUsername(username);
+        for (var token : issuedTokens) {
+            invalidatedTokenRepository.save(
+                com.example.identityservice.entity.InvalidatedToken.builder()
+                    .id(token.getId())
+                    .expiryTime(token.getExpiryTime())
+                    .build()
+            );
+        }
+        issuedTokenRepository.deleteByUsername(username);
         userRepository.delete(user);
         return userMapper.toUserResponse(user);
     }
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public UserResponse deleteUserById(long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
+        // Invalidate all tokens
+        var issuedTokens = issuedTokenRepository.findByUsername(user.getUsername());
+        for (var token : issuedTokens) {
+            invalidatedTokenRepository.save(
+                com.example.identityservice.entity.InvalidatedToken.builder()
+                    .id(token.getId())
+                    .expiryTime(token.getExpiryTime())
+                    .build()
+            );
+        }
+        issuedTokenRepository.deleteByUsername(user.getUsername());
         userRepository.delete(user);
         return userMapper.toUserResponse(user);
     }

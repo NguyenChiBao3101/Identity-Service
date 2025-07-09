@@ -2,7 +2,10 @@ package com.example.identityservice.controller;
 
 import com.example.identityservice.dto.request.UserCreationRequest;
 import com.example.identityservice.dto.request.UserUpdateRequest;
+import com.example.identityservice.dto.request.UserRoleUpdateRequest;
+import com.example.identityservice.dto.response.UserCreationResponse;
 import com.example.identityservice.dto.response.UserResponse;
+import com.example.identityservice.dto.response.UserUpdateResponse;
 import com.example.identityservice.entity.User;
 import com.example.identityservice.service.UserService;
 import jakarta.validation.Valid;
@@ -21,14 +24,13 @@ public class UserController {
     @Autowired
     private UserService userService;
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+    public ResponseEntity<UserCreationResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         return ResponseEntity.ok(userService.createNewUser(request));
     }
 
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("username :{}", authentication.getName());
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
         return ResponseEntity.ok(userService.getAllUsers());
     }
@@ -44,10 +46,14 @@ public class UserController {
     }
 
     @PutMapping("/update/{username}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable String username, @RequestBody UserUpdateRequest request) {
+    public ResponseEntity<UserUpdateResponse> updateUser(@PathVariable String username, @RequestBody UserUpdateRequest request) {
         return ResponseEntity.ok(userService.updateUser(request, username));
     }
 
+    @PutMapping("/updateRole/{username}")
+    public ResponseEntity<UserResponse> updateRoleUser(@PathVariable String username, @RequestBody UserRoleUpdateRequest request) {
+        return ResponseEntity.ok(userService.updateUserRoles(username, request));
+    }
     @DeleteMapping("/deleteByUsername/{username}")
     public ResponseEntity<UserResponse> deleteUserByUsername(@PathVariable String username){
         return ResponseEntity.ok(userService.deleteUserByUsername(username));

@@ -28,29 +28,40 @@ public class SecurityConfig {
     @Value("${jwt.signerKey}")
     private String signerKey;
 
-    private final String[] PUBLIC_ENDPOINTS = {
-            "/user/register",
-            "/auth/log-in",
-            "/auth/introspect",
-            "/auth/refresh",
-            "/auth/logout",
+    @Autowired
+    private CustomJwtDecoder customJwtDecoder;
+
+    @Autowired
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
+    private final String[] SWAGGER_ENDPOINTS = {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
             "/v1/api-docs/**"
     };
+
+    private final String[] AUTH_ENDPOINTS = {
+            "/user/register",
+            "/auth/log-in",
+            "/auth/introspect",
+            "/auth/refresh",
+            "/auth/logout"
+    };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request ->
-                        request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v1/api-docs/**").permitAll()
-                                .anyRequest().authenticated()
+                request
+                        .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.POST, AUTH_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated()
         );
 
         httpSecurity.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwtConfigurer ->
-                                jwtConfigurer.decoder(jwtDecoder())
-                                        .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        jwtConfigurer.decoder(jwtDecoder()
+                                ).jwtAuthenticationConverter(jwtAuthenticationConverter())
+                ).authenticationEntryPoint(customAuthenticationEntryPoint)
         );
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();
@@ -58,11 +69,7 @@ public class SecurityConfig {
 
     @Bean
     JwtDecoder jwtDecoder() {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(),"HS512");
-        return NimbusJwtDecoder
-                .withSecretKey(secretKeySpec)
-                .macAlgorithm(MacAlgorithm.HS512)
-                .build();
+        return customJwtDecoder;
     }
 
     @Bean

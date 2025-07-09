@@ -27,9 +27,10 @@ public class RoleController {
 
         return  ResponseEntity.ok(service.getAllRoles());
     }
-
-    @DeleteMapping("/{name}")
-    public void deleteRole(@PathVariable String name) {
-        service.deleteRole(name);
+    @PutMapping("/update/{name}")
+    public ResponseEntity<RoleResponse> updateRole(
+            @PathVariable String name,
+            @RequestBody RoleRequest request) {
+        return ResponseEntity.ok(service.updateRole(name, request));
     }
 }
