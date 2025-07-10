@@ -84,6 +84,7 @@ public class AuthenticationService {
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
+                .claim("userId", user.getUserId())  //thêm userid vào ClaimSet
                 .claim("scope",buildScope(user))
                 .build();
 
