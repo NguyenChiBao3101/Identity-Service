@@ -15,8 +15,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PermissionService {
+    @Autowired
     private final PermissionRepository permissionRepository;
-
+    @Autowired
     private final PermissionMapper mapper;
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
     public PermissionResponse createPermission(PermissionRequest request) {
