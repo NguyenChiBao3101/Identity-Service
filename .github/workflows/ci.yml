@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+env:
+  JWT_SIGNER_KEY: f9dWvRBBOQVAUBP9wDYJKV988M1X8/yETauF8s+n6HlRzEoo89RqKa1n7FRlHNbO
 
 jobs:
   build:
