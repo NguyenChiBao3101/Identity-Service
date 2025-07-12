@@ -30,11 +30,15 @@ public class ApplicationInitConfig {
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         return args -> {
             if (userRepository.findByUsername("admin").isEmpty()) {
-                Role adminRole = roleRepository.findById("ADMIN").orElseThrow(() -> new RuntimeException("ADMIN role is invalid"));
+                Role userRole = roleRepository.findById(Roles.ADMIN.name())
+                        .orElseThrow(() -> new RuntimeException("Default role ADMIN not found"));
                 Set<Role> roles = new HashSet<>();
-                roles.add(adminRole);
+                roles.add(userRole);
                 User user = User.builder()
                         .username("admin")
+                        .email("admin@gmail.com")
+                        .firstName("orab")
+                        .lastName("sihc")
                         .password(passwordEncoder.encode("admin"))
                         .roles(roles)
                         .build();
