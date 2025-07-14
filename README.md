@@ -110,7 +110,7 @@ curl -X POST "http://localhost:8080/auth/log-in" \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin",
-    "password": "password"
+    "password": "admin"
   }'
 ```
 
