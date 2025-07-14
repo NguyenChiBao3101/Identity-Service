@@ -9,17 +9,20 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
     @Value("${jwt.signerKey}")
     private String signerKey;
 
@@ -44,23 +47,63 @@ public class SecurityConfig {
             "/auth/refresh",
             "/auth/logout"
     };
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {    //fixed
+//        httpSecurity
+//                .authorizeHttpRequests(request -> request
+//                        .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
+//                        .requestMatchers(HttpMethod.POST, AUTH_ENDPOINTS).permitAll()
+//                        .anyRequest().authenticated()
+//                )
+//                .csrf(AbstractHttpConfigurer::disable) // Có thể bật nếu frontend hỗ trợ CSRF token
+//                .headers(headers -> headers
+//                        .xssProtection(HeadersConfigurer.XXssConfig::disable)
+//                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
+//                        .contentTypeOptions(withDefaults -> {})
+//                        .httpStrictTransportSecurity(hsts ->
+//                                hsts.includeSubDomains(true).maxAgeInSeconds(31536000))
+//                        .contentSecurityPolicy(csp ->
+//                                csp.policyDirectives("default-src 'self'"))
+//                )
+//                .oauth2ResourceServer(oauth2 -> oauth2
+//                        .jwt(jwt -> jwt.decoder(jwtDecoder())
+//                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+//                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+//                );
+//        return httpSecurity.build();
+//    }
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins("http://localhost:8386")
+//                .allowedMethods("GET", "POST", "PUT", "DELETE")
+//                .allowedHeaders("Authorization", "Content-Type")
+//                .allowCredentials(true);
+//    }
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request ->
-                request
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {    //get error
+        httpSecurity
+                .authorizeHttpRequests(request -> request
                         .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST, AUTH_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated()
-        );
-
-        httpSecurity.oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwtConfigurer ->
-                        jwtConfigurer.decoder(jwtDecoder()
-                                ).jwtAuthenticationConverter(jwtAuthenticationConverter())
-                ).authenticationEntryPoint(customAuthenticationEntryPoint)
-        );
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+                        .anyRequest().permitAll()
+                )
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(AbstractHttpConfigurer::disable)
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(jwt -> jwt.decoder(jwtDecoder())
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                );
         return httpSecurity.build();
+    }
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("*")
+                .allowedMethods("*")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 
     @Bean
