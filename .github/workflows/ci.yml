@@ -1,40 +1,82 @@
-name: Build and Test Spring Boot App
+name: CI/CD Pipeline with Security Test
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-env:
-  JWT_SIGNER_KEY: ${{ secrets.JWT_SIGNER_KEY }}
 
 jobs:
-  build:
+  build-test-zap:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: 310115cb@
+          MYSQL_DATABASE: identity_service
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -p310115cb@"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h"127.0.0.1" -uroot -p'310115cb@'; then
+              break
+            fi
+            sleep 2
+          done
 
       - name: Build with Maven
-        run: mvn clean install
+        run: ./mvnw clean package -DskipTests
 
-      - name: Run unit tests
-        run: mvn test
+      - name: Run Spring Boot app
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/identity_service
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: 310115cb@
+          JWT_SIGNER_KEY: ${{ secrets.JWT_SIGNER_KEY }}
+        run: nohup ./mvnw spring-boot:run &
 
-      # Optional: Kiểm tra chất lượng mã (ví dụ Checkstyle)
-      # - name: Run Checkstyle
-      #   run: mvn checkstyle:check
+      - name: Wait for Spring Boot to be ready
+        run: |
+          for i in {1..30}; do
+            if nc -z localhost 8386; then
+              echo "Spring Boot started"
+              break
+            fi
+            sleep 5
+          done
 
-      # Optional: Upload artifact nếu muốn deploy
-      # - name: Upload build artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: spring-boot-app
-      #     path: target/*.jar
+      - name: Run integration tests
+        run: ./mvnw test
+
+      - name: OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.10.0
+        with:
+          target: 'http://localhost:8386'
+          fail_action: true
+          report_html: true
+          cmd_options: '-a'
+
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: zap-report
+          path: report_html.html
