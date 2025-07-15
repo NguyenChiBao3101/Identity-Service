@@ -73,8 +73,8 @@ jobs:
         with:
           target: 'http://localhost:8386'
           fail_action: true
-          report_html: true
           cmd_options: '-a -r report_html.html -J report_json.json -w report_md.md'
+          artifact_name: zap_scan
 
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
