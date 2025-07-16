@@ -5,7 +5,7 @@ parameters:
 jobs:
   - type: openapi
     parameters:
-      file: /zap/wrk/openapi.json
+      url: http://localhost:8386/api-docs
 
   - type: spider
     parameters:
