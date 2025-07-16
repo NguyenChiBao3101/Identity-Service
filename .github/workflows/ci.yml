@@ -84,8 +84,10 @@ jobs:
 
       - name: Run ZAP Automation Framework via Docker
         run: |
-            docker run --network=host -v ${{ github.workspace }}:/zap/wrk/:rw \
-              ghcr.io/zaproxy/zaproxy:stable zap.sh -cmd -autorun /zap/wrk/zap-automation.yaml
+          docker run --network=host -v ${{ github.workspace }}:/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:weekly zap.sh \
+            -addoninstall openapi \
+            -cmd -autorun /zap/wrk/zap-automation.yaml
 
       - name: Upload ZAP Report
         if: always()

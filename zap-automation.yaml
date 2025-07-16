@@ -3,6 +3,11 @@ parameters:
   progressToStdout: true
 
 jobs:
+  - type: context
+    parameters:
+      name: "Default Context"
+      urls:
+      - "http://${ZAP_TARGET_HOST}:8386/.*"
   - type: openapi
     parameters:
       file: /zap/wrk/openapi.json
