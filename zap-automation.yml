@@ -12,7 +12,7 @@ jobs:
   - type: openapi
     context: identity-api
     parameters:
-      file: openapi.json
+      url: http://localhost:8386/api-docs
 
   - type: spider
     context: identity-api
