@@ -58,23 +58,17 @@ jobs:
       - name: Print Spring Boot log
         run: cat spring.log || true
 
-      - name: Copy zap-automation.yml
-        run: mkdir zap && cp zap-automation.yml zap/
-
-      - name: Create ZAP image with /zap/reports directory
+      - name: Prepare ZAP working directory
         run: |
-          docker create --name zap_scan_temp ghcr.io/zaproxy/zaproxy:stable
-          docker start zap_scan_temp
-          docker exec zap_scan_temp mkdir -p /zap/reports
-          docker commit zap_scan_temp zap_with_reports
-          docker rm -f zap_scan_temp
+          mkdir -p zap/reports
+          cp zap-automation.yml zap/
 
       - name: Run ZAP Automation Framework via Docker
         run: |
           docker run --name zap_scan \
             --network=host \
             -v ${{ github.workspace }}/zap:/zap/wrk/:rw \
-            zap_with_reports \
+            ghcr.io/zaproxy/zaproxy:stable \
             zap.sh -addoninstall openapi \
             -cmd -autorun /zap/wrk/zap-automation.yml
 
