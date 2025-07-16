@@ -29,6 +29,16 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         return args -> {
+            // Tạo role ADMIN nếu chưa có
+            if (roleRepository.findById(Roles.ADMIN.name()).isEmpty()) {
+                Role adminRole = new Role();
+                adminRole.setName(Roles.ADMIN.name());
+                adminRole.setDescription("Administrator role");
+                roleRepository.save(adminRole);
+                log.info("Created ADMIN role");
+            }
+
+            // Tạo user admin nếu chưa có
             if (userRepository.findByUsername("admin").isEmpty()) {
                 Role userRole = roleRepository.findById(Roles.ADMIN.name())
                         .orElseThrow(() -> new RuntimeException("Default role ADMIN not found"));
@@ -37,8 +47,8 @@ public class ApplicationInitConfig {
                 User user = User.builder()
                         .username("admin")
                         .email("admin@gmail.com")
-                        .firstName("orab")
-                        .lastName("sihc")
+                        .firstName("bao")
+                        .lastName("nguyen")
                         .password(passwordEncoder.encode("admin"))
                         .roles(roles)
                         .build();
