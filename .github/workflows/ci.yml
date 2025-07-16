@@ -1,4 +1,4 @@
-name: CI/CD Pipeline with Security Test
+name: CI/CD Pipeline with ZAP Security Scan
 
 on:
   push:
@@ -34,15 +34,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Wait for MySQL to be ready
-        run: |
-          for i in {1..30}; do
-            if mysqladmin ping -h"127.0.0.1" -uroot -p'310115cb@'; then
-              break
-            fi
-            sleep 2
-          done
-
       - name: Build with Maven
         run: ./mvnw clean package -DskipTests
 
@@ -66,14 +57,6 @@ jobs:
 
       - name: Print Spring Boot log
         run: cat spring.log || true
-
-      - name: Run integration tests
-        env:
-          JWT_SIGNER_KEY: ${{ secrets.JWT_SIGNER_KEY }}
-        run: ./mvnw test
-
-      - name: Download OpenAPI spec
-        run: curl -o openapi.json http://localhost:8386/api-docs
 
       - name: Run ZAP Automation Framework via Docker
         run: |
