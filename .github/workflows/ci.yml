@@ -52,7 +52,7 @@ jobs:
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: 310115cb@
           JWT_SIGNER_KEY: your-sign-key
-        run: nohup ./mvnw spring-boot:run &
+        run: nohup ./mvnw spring-boot:run > spring.log 2>&1 &
 
       - name: Wait for Spring Boot to be ready
         run: |
@@ -63,6 +63,9 @@ jobs:
             fi
             sleep 5
           done
+
+      - name: Print Spring Boot log
+        run: cat spring.log || true
 
       - name: Get runner IP
         id: get_ip
