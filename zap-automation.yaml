@@ -5,7 +5,7 @@ parameters:
 jobs:
   - type: openapi
     parameters:
-      file: http://${{ ZAP_TARGET_HOST }}:8386/api-docs
+      url: http://${ZAP_TARGET_HOST}:8386/api-docs
 
   - type: spider
     parameters:
