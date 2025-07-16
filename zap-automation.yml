@@ -10,25 +10,24 @@ parameters:
 
 jobs:
   - type: openapi
-    context: identity-api
     parameters:
-      url: http://localhost:8386/api-docs
+      file: openapi.json
+      targetUrl: http://localhost:8386
 
   - type: spider
     context: identity-api
     parameters:
-      maxDuration: 1
+      maxDuration: 2
 
   - type: passiveScan-wait
 
   - type: activeScan
-    context: identity-api
     parameters:
       policy: Default Policy
 
   - type: report
     parameters:
-      reportDir: .
+      reportDir: /zap/wrk
       reportFile: report_html.html
       reportTitle: "ZAP API Scan"
       template: traditional-html
