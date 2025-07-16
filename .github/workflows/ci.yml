@@ -67,15 +67,6 @@ jobs:
       - name: Print Spring Boot log
         run: cat spring.log || true
 
-      - name: Get runner IP
-        id: get_ip
-        run: echo "IP=$(hostname -I | awk '{print $1}')" >> $GITHUB_OUTPUT
-
-      - name: Check if app is running
-        run: |
-          curl -v http://localhost:8386 || true
-          curl -v http://${{ steps.get_ip.outputs.IP }}:8386 || true
-
       - name: Run integration tests
         env:
           JWT_SIGNER_KEY: ${{ vars.JWT_SIGNER_KEY }}
