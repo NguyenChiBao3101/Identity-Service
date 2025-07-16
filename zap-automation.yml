@@ -28,6 +28,6 @@ jobs:
   - type: report
     parameters:
       reportDir: /zap/wrk
-      reportFile: report_html.html
+      reportFile: report.html
       reportTitle: "ZAP API Scan"
       template: traditional-html
