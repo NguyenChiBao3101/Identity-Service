@@ -72,15 +72,8 @@ jobs:
           JWT_SIGNER_KEY: ${{ secrets.JWT_SIGNER_KEY }}
         run: ./mvnw test
 
-      - name: Get runner IP
-        id: get_ip
-        run: echo "IP=$(hostname -I | awk '{print $1}')" >> $GITHUB_OUTPUT
-
-      - name: Set ZAP_TARGET_HOST env
-        run: echo "ZAP_TARGET_HOST=$(hostname -I | awk '{print $1}')" >> $GITHUB_ENV
-
-#      - name: Download OpenAPI spec
-#        run: curl -o openapi.json http://localhost:8386/api-docs
+      - name: Download OpenAPI spec
+        run: curl -o openapi.json http://localhost:8386/api-docs
 
       - name: Run ZAP Automation Framework via Docker
         run: |

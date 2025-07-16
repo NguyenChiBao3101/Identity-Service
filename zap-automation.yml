@@ -1,19 +1,28 @@
+env:
+  contexts:
+    - name: identity-api
+      urls:
+        - http://localhost:8386
+
 parameters:
   failOnError: true
   progressToStdout: true
 
 jobs:
   - type: openapi
+    context: identity-api
     parameters:
-      url: http://localhost:8386/api-docs
+      file: openapi.json
 
   - type: spider
+    context: identity-api
     parameters:
       maxDuration: 1
 
   - type: passiveScan-wait
 
   - type: activeScan
+    context: identity-api
     parameters:
       policy: Default Policy
 
