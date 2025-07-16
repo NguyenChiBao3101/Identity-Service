@@ -5,7 +5,7 @@ parameters:
 jobs:
   - type: openapi
     parameters:
-      url: http://${ZAP_TARGET_HOST}:8386/api-docs
+      file: /zap/wrk/openapi.json
 
   - type: spider
     parameters:
