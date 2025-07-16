@@ -87,8 +87,8 @@ jobs:
           target: 'http://${{ steps.get_ip.outputs.IP }}:8386'
           fail_action: false
           cmd_options: '-a -r report_html.html -J report_json.json -w report_md.md'
-          artifact_name: zap.scan
-          token: ${{ secrets.ZAP_TOKEN }}   # <-- Thêm dòng này!
+          artifact_name: zap-scan
+          token: ${{ secrets.ZAP_TOKEN }}
           allow_issue_writing: true
 
       - name: Upload ZAP Report
