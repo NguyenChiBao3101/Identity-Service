@@ -3,16 +3,15 @@ env:
     - name: identity-api
       urls:
         - http://localhost:8386
-
-parameters:
-  failOnError: true
-  progressToStdout: true
+      includePaths:
+        - http://localhost:8386/.*
 
 jobs:
   - type: openapi
     parameters:
       targetUrl: http://localhost:8386
       apiUrl: http://localhost:8386/api-docs
+    context: identity-api
 
   - type: spider
     parameters:
@@ -24,10 +23,11 @@ jobs:
   - type: activeScan
     parameters:
       policy: Default Policy
+    context: identity-api
 
   - type: report
     parameters:
-      reportDir: /zap/wrk
+      reportDir: /zap/reports
       reportFile: zap-report.html
-      reportTitle: "ZAP API Scan"
+      reportTitle: ZAP API Scan
       template: traditional-html

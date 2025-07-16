@@ -1,4 +1,4 @@
-name: CI/CD Pipeline with ZAP Security Scan
+name: ZAP Security Scan
 
 on:
   push:
@@ -7,67 +7,50 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-test-zap:
+  zap-scan:
     runs-on: ubuntu-latest
-
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: 310115cb@
-          MYSQL_DATABASE: identity_service
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost -uroot -p310115cb@"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
 
-      - name: Build with Maven
-        run: ./mvnw clean package -DskipTests
-
-      - name: Run Spring Boot app
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/identity_service
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: 310115cb@
-          JWT_SIGNER_KEY: ${{ secrets.JWT_SIGNER_KEY }}
-        run: nohup ./mvnw spring-boot:run > spring.log 2>&1 &
-
-      - name: Wait for Spring Boot to be ready
+      - name: Build & Start Spring Boot API
         run: |
-          for i in {1..45}; do
-            if nc -z localhost 8386; then
-              echo "Spring Boot started"
-              break
-            fi
-            sleep 3
-          done
+          ./mvnw clean package -DskipTests
+          nohup java -jar target/*.jar &
 
-      - name: Print Spring Boot log
-        run: cat spring.log || true
-
-      - name: Run ZAP Automation Framework via Docker
+      - name: Wait for API to be ready
         run: |
-          docker run --network=host -v ${{ github.workspace }}:/zap/wrk/:rw \
+          echo "Waiting for backend to start..."
+          sleep 20
+          curl -sSf http://localhost:8386 || (echo "API failed to start"; exit 1)
+
+      - name: Copy zap-automation.yml
+        run: mkdir zap && cp zap-automation.yml zap/
+
+      - name: Run ZAP Automation inside Docker
+        run: |
+          docker run --name zap_scan \
+            --network=host \
+            -v ${{ github.workspace }}/zap:/zap/wrk/:rw \
             ghcr.io/zaproxy/zaproxy:stable zap.sh \
             -addoninstall openapi \
             -cmd -autorun /zap/wrk/zap-automation.yml
 
+      - name: Copy ZAP Report from container
+        run: docker cp zap_scan:/zap/reports/zap-report.html ./zap-report.html
+
       - name: Upload ZAP Report
-        if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: zap-report
           path: zap-report.html
+
+      - name: Clean up ZAP container
+        run: docker rm zap_scan
