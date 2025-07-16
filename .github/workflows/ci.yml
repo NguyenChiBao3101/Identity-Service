@@ -79,13 +79,10 @@ jobs:
       - name: Set ZAP_TARGET_HOST env
         run: echo "ZAP_TARGET_HOST=$(hostname -I | awk '{print $1}')" >> $GITHUB_ENV
 
-      - name: Download OpenAPI spec
-        run: curl -o openapi.json http://${{ steps.get_ip.outputs.IP }}:8386/api-docs
-
       - name: Run ZAP Automation Framework via Docker
         run: |
           docker run --network=host -v ${{ github.workspace }}:/zap/wrk/:rw \
-            ghcr.io/zaproxy/zaproxy:weekly zap.sh \
+            ghcr.io/zaproxy/zaproxy:stable zap.sh \
             -addoninstall openapi \
             -cmd -autorun /zap/wrk/zap-automation.yaml
 
