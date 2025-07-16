@@ -86,7 +86,12 @@ jobs:
         with:
           target: 'http://${{ steps.get_ip.outputs.IP }}:8386'
           fail_action: false
-          cmd_options: '-a -r report_html.html -J report_json.json -w report_md.md'
+          cmd_options: >
+            -a
+            -r report_html.html
+            -J report_json.json
+            -w report_md.md
+            --openapi http://${{ steps.get_ip.outputs.IP }}:8386/api-docs
           token: ${{ secrets.ZAP_TOKEN }}
           allow_issue_writing: true
 
