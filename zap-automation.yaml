@@ -1,0 +1,25 @@
+parameters:
+  failOnError: true
+  progressToStdout: true
+
+jobs:
+  - type: openapi
+    parameters:
+      file: http://${{ ZAP_TARGET_HOST }}:8386/api-docs
+
+  - type: spider
+    parameters:
+      maxDuration: 1
+
+  - type: passiveScan-wait
+
+  - type: activeScan
+    parameters:
+      policy: Default Policy
+
+  - type: report
+    parameters:
+      reportDir: .
+      reportFile: report_html.html
+      reportTitle: "ZAP API Scan"
+      template: traditional-html
