@@ -51,7 +51,7 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/identity_service
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: 310115cb@
-          JWT_SIGNER_KEY: ${{ vars.JWT_SIGNER_KEY }}
+          JWT_SIGNER_KEY: ${{ secrets.JWT_SIGNER_KEY }}
         run: nohup ./mvnw spring-boot:run > spring.log 2>&1 &
 
       - name: Wait for Spring Boot to be ready
@@ -69,11 +69,16 @@ jobs:
 
       - name: Run integration tests
         env:
-          JWT_SIGNER_KEY: ${{ vars.JWT_SIGNER_KEY }}
+          JWT_SIGNER_KEY: ${{ secrets.JWT_SIGNER_KEY }}
         run: ./mvnw test
+
+      - name: Get runner IP
+        id: get_ip
+        run: echo "IP=$(hostname -I | awk '{print $1}')" >> $GITHUB_OUTPUT
 
       - name: Set ZAP_TARGET_HOST env
         run: echo "ZAP_TARGET_HOST=$(hostname -I | awk '{print $1}')" >> $GITHUB_ENV
+
       - name: Download OpenAPI spec
         run: curl -o openapi.json http://${{ steps.get_ip.outputs.IP }}:8386/api-docs
 
