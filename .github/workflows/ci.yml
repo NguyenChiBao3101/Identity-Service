@@ -81,18 +81,13 @@ jobs:
           JWT_SIGNER_KEY: ${{ vars.JWT_SIGNER_KEY }}
         run: ./mvnw test
 
-      - name: Print Spring Boot log
-        run: cat spring.log || true
-
       - name: Set ZAP_TARGET_HOST env
         run: echo "ZAP_TARGET_HOST=$(hostname -I | awk '{print $1}')" >> $GITHUB_ENV
 
-      - name: Run ZAP Automation Framework
-        uses: zaproxy/action-automation@v0.11.0
-        with:
-            plan: zap-automation.yaml
-            token: ${{ secrets.ZAP_TOKEN }}
-            allow_issue_writing: true
+      - name: Run ZAP Automation Framework via Docker
+        run: |
+            docker run --network=host -v ${{ github.workspace }}:/zap/wrk/:rw \
+              ghcr.io/zaproxy/zaproxy:stable zap.sh -cmd -autorun /zap/wrk/zap-automation.yaml
 
       - name: Upload ZAP Report
         if: always()
