@@ -11,8 +11,8 @@ parameters:
 jobs:
   - type: openapi
     parameters:
-      url: http://localhost:8386/api-docs
       targetUrl: http://localhost:8386
+      apiUrl: http://localhost:8386/api-docs
 
   - type: spider
     parameters:
