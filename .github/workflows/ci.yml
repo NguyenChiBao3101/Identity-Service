@@ -62,7 +62,6 @@ jobs:
         run: |
           mkdir -p zap
           cp zap-automation.yml zap/
-          touch zap/zap-report.html
 
       - name: Debug zap dir
         run: ls -la zap
@@ -83,7 +82,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: zap-report.html
+          path: zap/zap-report.html
 
       - name: Clean up ZAP container
         run: docker rm zap_scan
