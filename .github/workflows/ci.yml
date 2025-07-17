@@ -59,7 +59,7 @@ jobs:
         run: cat spring.log || true
 
       - name: Prepare zap folder
-        run: mkdir -p zap && touch zap/zap-automation.yml
+        run: mkdir -p zap && cp zap-automation.yml zap/
 
       - name: Debug zap dir
         run: ls -la zap
