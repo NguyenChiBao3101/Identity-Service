@@ -83,6 +83,3 @@ jobs:
         with:
           name: zap-report
           path: zap/zap-report.html
-
-      - name: Clean up ZAP container
-        run: docker rm zap_scan
