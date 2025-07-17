@@ -4,7 +4,6 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
 
 jobs:
   build-test-zap:
@@ -70,6 +69,7 @@ jobs:
         run: |
           docker run --rm \
             --network=host \
+            --user 0 \
             -v ${{ github.workspace }}/zap:/zap/wrk \
             ghcr.io/zaproxy/zaproxy:stable \
             zap.sh -addoninstall openapi \
