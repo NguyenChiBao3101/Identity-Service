@@ -68,9 +68,9 @@ jobs:
 
       - name: Run ZAP Automation Framework via Docker
         run: |
-          docker run --name zap_scan \
+          docker run --rm \
             --network=host \
-            -v ${{ github.workspace }}/zap:/zap/wrk/:rw \
+            -v ${{ github.workspace }}/zap:/zap/wrk \
             ghcr.io/zaproxy/zaproxy:stable \
             zap.sh -addoninstall openapi \
             -cmd -autorun /zap/wrk/zap-automation.yml
