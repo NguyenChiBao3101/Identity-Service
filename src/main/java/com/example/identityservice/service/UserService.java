@@ -127,28 +127,28 @@ public class UserService {
 
     // User update theirs own info by username                                      (get error)
 //    @PostAuthorize("returnObject.username == authentication.name")
-//    public UserResponse updateUser(UserUpdateRequest request, String username) {
-//        User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
-//        //update user
-//        userMapper.updateUser(user,request);
-//        //encrypt updated password
-//        user.setPassword(passwordEncoder.encode(request.getPassword()));
-//
-//        var roles = roleRepository.findAllById(request.getRoles());
-//        user.setRoles(new HashSet<>(roles));
-//        return  userMapper.toUserResponse(userRepository.save(user));
-//    }
-
-    // User update theirs own info by username (fixed)
-    @PostAuthorize("returnObject.username == authentication.name")
-    public UserUpdateResponse updateUser(UserUpdateRequest request, String username) {
+    public UserResponse updateUser(UserUpdateRequest request, String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
         //update user
         userMapper.updateUser(user,request);
         //encrypt updated password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        return  userMapper.toUserUpdateResponse(userRepository.save(user));
+
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
+        return  userMapper.toUserResponse(userRepository.save(user));
     }
+
+    // User update theirs own info by username (fixed)
+//    @PostAuthorize("returnObject.username == authentication.name")
+//    public UserUpdateResponse updateUser(UserUpdateRequest request, String username) {
+//        User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
+//        //update user
+//        userMapper.updateUser(user,request);
+//        //encrypt updated password
+//        user.setPassword(passwordEncoder.encode(request.getPassword()));
+//        return  userMapper.toUserUpdateResponse(userRepository.save(user));
+//    }
 
     // admin update user role
     @PreAuthorize("hasRole('ADMIN')")

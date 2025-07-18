@@ -168,20 +168,20 @@ public class UserController {
             description = "Không tìm thấy người dùng"
         )
     })
-    public ResponseEntity<UserUpdateResponse> updateUser(                                             // fixed
-            @Parameter(description = "Username của người dùng", required = true)
-            @PathVariable String username,
-            @Parameter(description = "Thông tin cập nhật", required = true)
-            @RequestBody UserUpdateRequest request) {
-        return ResponseEntity.ok(userService.updateUser(request, username));
-    }
-//    public ResponseEntity<UserResponse> updateUser(                                                 // get error
+//    public ResponseEntity<UserUpdateResponse> updateUser(                                             // fixed
 //            @Parameter(description = "Username của người dùng", required = true)
 //            @PathVariable String username,
 //            @Parameter(description = "Thông tin cập nhật", required = true)
 //            @RequestBody UserUpdateRequest request) {
 //        return ResponseEntity.ok(userService.updateUser(request, username));
 //    }
+    public ResponseEntity<UserResponse> updateUser(                                                 // get error
+            @Parameter(description = "Username của người dùng", required = true)
+            @PathVariable String username,
+            @Parameter(description = "Thông tin cập nhật", required = true)
+            @RequestBody UserUpdateRequest request) {
+        return ResponseEntity.ok(userService.updateUser(request, username));
+    }
 
     @PutMapping("/updateRole/{username}")
     @Operation(
