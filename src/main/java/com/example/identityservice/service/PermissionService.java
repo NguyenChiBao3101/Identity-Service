@@ -30,9 +30,5 @@ public class PermissionService {
         var permissions = permissionRepository.findAll();
          return permissions.stream().map(mapper::toPermissionResponse).toList();
     }
-    @PreAuthorize("hasRole('ADMIN')")
-    public void deletePermission(String permission) {
-        permissionRepository.deleteById(permission);
-    }
 
 }

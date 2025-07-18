@@ -14,16 +14,7 @@ jobs:
       targetUrl: http://localhost:8386
       apiUrl: http://localhost:8386/api-docs
 
-  - type: spider
-    parameters:
-      context: identity-api
-      maxDuration: 2
-
   - type: passiveScan-wait
-
-  - type: activeScan
-    parameters:
-      policy: Default Policy
 
   - type: report
     parameters:

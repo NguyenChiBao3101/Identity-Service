@@ -81,26 +81,4 @@ public class PermissionController {
     public ResponseEntity<List<PermissionResponse>> getAllPermission() {
         return ResponseEntity.ok(service.getAllPermission());
     }
-
-    @DeleteMapping("/{name}")
-    @Operation(
-        summary = "Xóa quyền hạn",
-        description = "Xóa một quyền hạn khỏi hệ thống"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Xóa thành công"
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Không tìm thấy quyền hạn"
-        )
-    })
-    public ResponseEntity<Void> deletePermission(
-            @Parameter(description = "Tên quyền hạn cần xóa", required = true)
-            @PathVariable String name) {
-        service.deletePermission(name);
-        return ResponseEntity.ok().build();
-    }
 }
