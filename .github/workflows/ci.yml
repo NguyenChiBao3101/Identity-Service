@@ -60,7 +60,7 @@ jobs:
       - name: Prepare ZAP files
         run: |
           mkdir -p zap/scripts
-          cp zap-automation.yml zap/
+          cp zap/zap-automation.yml zap/
           cp zap/scripts/*.js zap/scripts/
 
       - name: Run ZAP Automation Framework via Docker
