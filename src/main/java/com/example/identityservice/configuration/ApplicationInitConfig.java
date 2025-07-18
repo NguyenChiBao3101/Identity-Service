@@ -27,35 +27,90 @@ public class ApplicationInitConfig {
     private PasswordEncoder passwordEncoder;
 
     @Bean
-    ApplicationRunner applicationRunner(UserRepository userRepository) {
+    ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         return args -> {
-            // Tạo role ADMIN nếu chưa có
-            if (roleRepository.findById(Roles.ADMIN.name()).isEmpty()) {
-                Role adminRole = new Role();
-                adminRole.setName(Roles.ADMIN.name());
-                adminRole.setDescription("Administrator role");
-                roleRepository.save(adminRole);
-                log.info("Created ADMIN role");
+            // Tạo các role enum nếu chưa có trong DB
+            for (Roles roleEnum : Roles.values()) {
+                roleRepository.findById(roleEnum.name()).orElseGet(() -> {
+                    Role role = new Role();
+                    role.setName(roleEnum.name());
+                    role.setDescription(roleEnum.name() + " role");
+                    log.info("Created role: {}", roleEnum.name());
+                    return roleRepository.save(role);
+                });
             }
 
-            // Tạo user admin nếu chưa có
-            if (userRepository.findByUsername("admin").isEmpty()) {
-                Role userRole = roleRepository.findById(Roles.ADMIN.name())
-                        .orElseThrow(() -> new RuntimeException("Default role ADMIN not found"));
-                Set<Role> roles = new HashSet<>();
-                roles.add(userRole);
-                User user = User.builder()
-                        .username("admin")
-                        .email("admin@gmail.com")
-                        .firstName("bao")
-                        .lastName("nguyen")
-                        .password(passwordEncoder.encode("admin"))
-                        .roles(roles)
-                        .build();
-                userRepository.save(user);
-                System.out.println("User's role:" + user.getRoles());
-                log.warn("Admin account has been created with default password");
+            // Lấy role từ DB
+            Role adminRole = roleRepository.findById(Roles.ADMIN.name())
+                    .orElseThrow(() -> new RuntimeException("ADMIN role not found"));
+            Role clientRole = roleRepository.findById(Roles.USER.name())
+                    .orElseThrow(() -> new RuntimeException("CLIENT role not found"));
+
+            Set<Role> adminRoles = Set.of(adminRole);
+            Set<Role> clientRoles = Set.of(clientRole);
+
+            // Danh sách user cần tạo
+            User[] defaultUsers = new User[] {
+                    User.builder()
+                            .username("admin")
+                            .email("admin@gmail.com")
+                            .firstName("Bao")
+                            .lastName("Nguyen")
+                            .password(passwordEncoder.encode("admin"))
+                            .roles(adminRoles)
+                            .build(),
+                    User.builder()
+                            .username("user1")
+                            .email("user1@gmail.com")
+                            .firstName("Alice")
+                            .lastName("Tran")
+                            .password(passwordEncoder.encode("user123"))
+                            .roles(clientRoles)
+                            .build(),
+                    User.builder()
+                            .username("user2")
+                            .email("user2@gmail.com")
+                            .firstName("Bob")
+                            .lastName("Le")
+                            .password(passwordEncoder.encode("user123"))
+                            .roles(clientRoles)
+                            .build(),
+                    User.builder()
+                            .username("user3")
+                            .email("user3@gmail.com")
+                            .firstName("Carol")
+                            .lastName("Pham")
+                            .password(passwordEncoder.encode("user123"))
+                            .roles(clientRoles)
+                            .build(),
+                    User.builder()
+                            .username("user4")
+                            .email("user4@gmail.com")
+                            .firstName("David")
+                            .lastName("Nguyen")
+                            .password(passwordEncoder.encode("user123"))
+                            .roles(clientRoles)
+                            .build(),
+                    User.builder()
+                            .username("user5")
+                            .email("user5@gmail.com")
+                            .firstName("Eva")
+                            .lastName("Vo")
+                            .password(passwordEncoder.encode("user123"))
+                            .roles(clientRoles)
+                            .build()
+            };
+
+            // Lưu vào DB nếu username chưa tồn tại
+            for (User user : defaultUsers) {
+                if (userRepository.findByUsername(user.getUsername()).isEmpty()) {
+                    userRepository.save(user);
+                    log.info("Created user: {}", user.getUsername());
+                }
             }
+
+            log.warn("Default admin & users created if not present.");
         };
     }
+
 }
