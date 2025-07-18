@@ -5,7 +5,7 @@ env:
         - http://localhost:8386
 
 parameters:
-  failOnError: false
+  failOnError: true
   progressToStdout: true
 
 jobs:
@@ -13,32 +13,36 @@ jobs:
     name: Run API1 Test
     parameters:
       action: run
-      type: httpsender
+      type: standalone
       engine: JavaScript
+      name: API1
       file: /zap/scripts/API1.js
 
   - type: script
     name: Run API1-2 Test
     parameters:
       action: run
-      type: httpsender
+      type: standalone
       engine: JavaScript
+      name: API1-2
       file: /zap/scripts/API1-2.js
 
   - type: script
     name: Run API3 Test
     parameters:
       action: run
-      type: httpsender
+      type: standalone
       engine: JavaScript
+      name: API3
       file: /zap/scripts/API3.js
 
   - type: script
     name: Run API3-2 Test
     parameters:
       action: run
-      type: httpsender
+      type: standalone
       engine: JavaScript
+      name: API3-2
       file: /zap/scripts/API3-2.js
 
   - type: openapi
@@ -46,16 +50,9 @@ jobs:
       targetUrl: http://localhost:8386
       apiUrl: http://localhost:8386/api-docs
 
-  - type: openapi
-    parameters:
-      targetUrl: http://localhost:8386
-      apiUrl: http://localhost:8386/api-docs
-
-  - type: passiveScan-wait
-
   - type: report
     parameters:
       reportDir: /zap/wrk
       reportFile: zap-report.html
       template: traditional-html
-      reportTitle: "ZAP Scan for API OWASP Top 10"
+      reportTitle: ZAP Scan for API OWASP Top 10
