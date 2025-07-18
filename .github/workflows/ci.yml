@@ -57,13 +57,13 @@ jobs:
       - name: Print Spring Boot log
         run: cat spring.log || true
 
-      - name: Prepare zap folder
-        run: |
-          mkdir -p zap
-          cp zap/zap-automation.yml zap/
-
-      - name: Debug zap dir
-        run: ls -la zap
+#      - name: Prepare zap folder
+#        run: |
+#          mkdir -p zap-work
+#          cp zap/zap-automation.yml zap-work/
+#
+#      - name: Debug zap-work dir
+#        run: ls -la zap-work
 
       - name: Run ZAP Automation Framework via Docker
         run: |
