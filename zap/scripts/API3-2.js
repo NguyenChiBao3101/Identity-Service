@@ -33,8 +33,13 @@ var loginBody = JSON.stringify({
 var token = null;
 
 // === Log file ===
-var logFile = "C:/Users/asus/Desktop/report.txt";
-var writer = null;
+var logFile = "/zap/wrk/scan-log.txt";
+var writer = new BufferedWriter(new FileWriter(logFile, true)); // mở file ở chế độ append
+
+writer.write("[API3.js] Gửi request đến ...\n");
+writer.flush();
+writer.close();
+
 var formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 function initLog() {

@@ -13,8 +13,13 @@ var loginBody = '{"username":"orabSihc","password":"orab1234567"}';
 var token = null;
 
 // === Thông tin log ===
-var logFile = "C:/Users/Admin/Desktop/report.txt";
-var writer = null;
+var logFile = "/zap/wrk/scan-log.txt";
+var writer = new BufferedWriter(new FileWriter(logFile, true)); // mở file ở chế độ append
+
+writer.write("[API3.js] Gửi request đến ...\n");
+writer.flush();
+writer.close();
+
 var formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 // === Khởi tạo log file ===

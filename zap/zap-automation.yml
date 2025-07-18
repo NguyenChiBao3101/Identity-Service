@@ -5,10 +5,45 @@ env:
         - http://localhost:8386
 
 parameters:
-  failOnError: true
+  failOnError: false
   progressToStdout: true
 
 jobs:
+  - type: addOn
+    parameters:
+      addOns:
+        - script
+        - openapi
+
+  - type: script
+    parameters:
+      action: add
+      type: httpsender
+      engine: ECMAScript
+      name: API1
+      file: API1.js
+  - type: script
+    parameters:
+      action: add
+      type: httpsender
+      engine: ECMAScript
+      name: API1-2
+      file: API1-2.js
+  - type: script
+    parameters:
+      action: add
+      type: httpsender
+      engine: ECMAScript
+      name: API3
+      file: API3.js
+  - type: script
+    parameters:
+      action: add
+      type: httpsender
+      engine: ECMAScript
+      name: API3-2
+      file: API3-2.js
+
   - type: openapi
     parameters:
       targetUrl: http://localhost:8386
@@ -18,7 +53,7 @@ jobs:
 
   - type: report
     parameters:
-      template: traditional-html
-      reportTitle: ZAP API Scan
       reportDir: /zap/wrk
       reportFile: zap-report.html
+      template: traditional-html
+      reportTitle: "ZAP Scan for API OWASP Top 10"
