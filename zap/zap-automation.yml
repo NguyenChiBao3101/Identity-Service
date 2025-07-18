@@ -9,43 +9,42 @@ parameters:
   progressToStdout: true
 
 jobs:
-  - type: addOn
-    parameters:
-      addOns:
-        - script
-        - openapi
-
   - type: script
     name: Run API1 Test
     parameters:
-      script: API1.js
+      action: run
       type: httpsender
-      engine: javascript
+      engine: JavaScript
       file: /zap/scripts/API1.js
 
   - type: script
     name: Run API1-2 Test
     parameters:
-      script: API1-2.js
+      action: run
       type: httpsender
-      engine: javascript
+      engine: JavaScript
       file: /zap/scripts/API1-2.js
 
   - type: script
     name: Run API3 Test
     parameters:
-      script: API3.js
+      action: run
       type: httpsender
-      engine: javascript
+      engine: JavaScript
       file: /zap/scripts/API3.js
 
   - type: script
     name: Run API3-2 Test
     parameters:
-      script: API3-2.js
+      action: run
       type: httpsender
-      engine: javascript
+      engine: JavaScript
       file: /zap/scripts/API3-2.js
+
+  - type: openapi
+    parameters:
+      targetUrl: http://localhost:8386
+      apiUrl: http://localhost:8386/api-docs
 
   - type: openapi
     parameters:

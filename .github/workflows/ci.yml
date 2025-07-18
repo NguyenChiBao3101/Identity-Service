@@ -57,9 +57,6 @@ jobs:
       - name: Print Spring Boot log
         run: cat spring.log || true
 
-#      - name: Prepare ZAP files
-#        run: mkdir -p zap/scripts
-
       - name: Run ZAP Automation Framework via Docker
         run: |
           docker run --rm \
