@@ -60,7 +60,7 @@ jobs:
       - name: Prepare zap folder
         run: |
           mkdir -p zap
-          cp zap-automation.yml zap/
+          cp zap/zap-automation.yml zap/
 
       - name: Debug zap dir
         run: ls -la zap
