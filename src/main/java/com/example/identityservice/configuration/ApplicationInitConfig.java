@@ -27,23 +27,29 @@ public class ApplicationInitConfig {
     private PasswordEncoder passwordEncoder;
 
     @Bean
-    ApplicationRunner applicationRunner(UserRepository userRepository) {
+    ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         return args -> {
-            // Tạo role ADMIN nếu chưa có
-            if (roleRepository.findById(Roles.ADMIN.name()).isEmpty()) {
-                Role adminRole = new Role();
-                adminRole.setName(Roles.ADMIN.name());
-                adminRole.setDescription("Administrator role");
-                roleRepository.save(adminRole);
-                log.info("Created ADMIN role");
+            // Tạo sẵn các role enum nếu chưa có trong DB
+            for (Roles roleEnum : Roles.values()) {
+                roleRepository.findById(roleEnum.name()).orElseGet(() -> {
+                    Role role = new Role();
+                    role.setName(roleEnum.name());
+                    role.setDescription(roleEnum.name() + " role");
+                    log.info("Created role: {}", roleEnum.name());
+                    return roleRepository.save(role);
+                });
             }
 
             // Tạo user admin nếu chưa có
             if (userRepository.findByUsername("admin").isEmpty()) {
-                Role userRole = roleRepository.findById(Roles.ADMIN.name())
-                        .orElseThrow(() -> new RuntimeException("Default role ADMIN not found"));
-                Set<Role> roles = new HashSet<>();
-                roles.add(userRole);
+                // Lấy role từ enum -> tạo đối tượng mới, không phụ thuộc DB
+                Role adminRole = Role.builder()
+                        .name(Roles.ADMIN.name())
+                        .description("Administrator role")
+                        .build();
+
+                Set<Role> roles = Set.of(adminRole);
+
                 User user = User.builder()
                         .username("admin")
                         .email("admin@gmail.com")
@@ -53,8 +59,7 @@ public class ApplicationInitConfig {
                         .roles(roles)
                         .build();
                 userRepository.save(user);
-                System.out.println("User's role:" + user.getRoles());
-                log.warn("Admin account has been created with default password");
+                log.warn("Admin account created with default password: 'admin'");
             }
         };
     }
