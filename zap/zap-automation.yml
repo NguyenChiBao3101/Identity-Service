@@ -16,33 +16,36 @@ jobs:
         - openapi
 
   - type: script
+    name: Run API1 Test
     parameters:
-      action: add
+      script: API1.js
       type: httpsender
-      engine: ECMAScript
-      name: API1
-      file: API1.js
+      engine: javascript
+      file: /zap/scripts/API1.js
+
   - type: script
+    name: Run API1-2 Test
     parameters:
-      action: add
+      script: API1-2.js
       type: httpsender
-      engine: ECMAScript
-      name: API1-2
-      file: API1-2.js
+      engine: javascript
+      file: /zap/scripts/API1-2.js
+
   - type: script
+    name: Run API3 Test
     parameters:
-      action: add
+      script: API3.js
       type: httpsender
-      engine: ECMAScript
-      name: API3
-      file: API3.js
+      engine: javascript
+      file: /zap/scripts/API3.js
+
   - type: script
+    name: Run API3-2 Test
     parameters:
-      action: add
+      script: API3-2.js
       type: httpsender
-      engine: ECMAScript
-      name: API3-2
-      file: API3-2.js
+      engine: javascript
+      file: /zap/scripts/API3-2.js
 
   - type: openapi
     parameters:

@@ -73,13 +73,14 @@ jobs:
             zap.sh -addoninstall scripts -addoninstall openapi \
             -cmd -autorun /zap/wrk/zap-automation.yml
 
-      - name: Copy ZAP Report
-        run: cp zap/zap-report.html ./zap-report.html
-
-      - name: Upload ZAP Artifacts (Report + Logs)
+      - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
         with:
-          name: zap-outputs
-          path: |
-            zap/zap-report.html
-            zap/scan-log.txt
+          name: zap-report
+          path: zap/zap-report.html
+
+      - name: Upload ZAP Script Log
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-script-log
+          path: zap/scan-log.txt
