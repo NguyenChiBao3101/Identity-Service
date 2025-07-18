@@ -10,40 +10,64 @@ parameters:
 
 jobs:
   - type: script
-    name: Run API1 Test
+    name: Add API1 Script
     parameters:
-      action: run
+      action: add
       type: standalone
       engine: JavaScript
       name: API1
       file: /zap/scripts/API1.js
 
   - type: script
-    name: Run API1-2 Test
+    name: Run API1 Script
     parameters:
       action: run
+      name: API1
+
+  - type: script
+    name: Add API1-2 Script
+    parameters:
+      action: add
       type: standalone
       engine: JavaScript
       name: API1-2
       file: /zap/scripts/API1-2.js
 
   - type: script
-    name: Run API3 Test
+    name: Run API1-2 Script
     parameters:
       action: run
+      name: API1-2
+
+  - type: script
+    name: Add API3 Script
+    parameters:
+      action: add
       type: standalone
       engine: JavaScript
       name: API3
       file: /zap/scripts/API3.js
 
   - type: script
-    name: Run API3-2 Test
+    name: Run API3 Script
     parameters:
       action: run
+      name: API3
+
+  - type: script
+    name: Add API3-2 Script
+    parameters:
+      action: add
       type: standalone
       engine: JavaScript
       name: API3-2
       file: /zap/scripts/API3-2.js
+
+  - type: script
+    name: Run API3-2 Script
+    parameters:
+      action: run
+      name: API3-2
 
   - type: openapi
     parameters:
