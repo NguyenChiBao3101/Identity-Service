@@ -32,7 +32,7 @@ public class OpenAPIConfig {
                                 .name("MIT License")
                                 .url("https://opensource.org/licenses/MIT")))
                 .servers(
-                        Collections.singletonList(new Server().url("http://localhost:8386").description("Development server"))
+                        Collections.singletonList(new Server().url("http://localhost:8080").description("Development server"))
                 )
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()
