@@ -104,15 +104,14 @@ public class UserService {
     //get user by userId                                                        (fixed)
 //    @PostAuthorize("returnObject.userId == principal.getClaim('userId')")
 //    public User getUserById(long id) {
-//        //sửa lỗi từ đây
 //        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //        Jwt jwt = (Jwt) authentication.getPrincipal();
 //        Long userId = jwt.getClaim("userId");
-//
+
 //        // Kiểm tra userId có trùng với id được yêu cầu không
 //        if (!userId.equals(id)) {
 //            throw new ForbiddenException("You're not allow to access this user information");
-//        }// đến đây
+//        }
 //
 //        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found"));
 //        return user;

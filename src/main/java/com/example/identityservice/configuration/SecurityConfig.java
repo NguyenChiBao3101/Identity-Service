@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -27,6 +29,9 @@ public class SecurityConfig implements WebMvcConfigurer {
     private String signerKey;
 
     @Autowired
+    private Environment environment;
+
+    @Autowired
     private CustomJwtDecoder customJwtDecoder;
 
     @Autowired
@@ -48,38 +53,48 @@ public class SecurityConfig implements WebMvcConfigurer {
             "/auth/logout"
     };
 //    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {    //fixed
+//    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 //        httpSecurity
-//                .authorizeHttpRequests(request -> request
-//                        .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
-//                        .requestMatchers(HttpMethod.POST, AUTH_ENDPOINTS).permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .csrf(AbstractHttpConfigurer::disable) // Có thể bật nếu frontend hỗ trợ CSRF token
+//                .csrf(AbstractHttpConfigurer::disable)
 //                .headers(headers -> headers
-//                        .xssProtection(HeadersConfigurer.XXssConfig::disable)
 //                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
-//                        .contentTypeOptions(withDefaults -> {})
-//                        .httpStrictTransportSecurity(hsts ->
-//                                hsts.includeSubDomains(true).maxAgeInSeconds(31536000))
-//                        .contentSecurityPolicy(csp ->
-//                                csp.policyDirectives("default-src 'self'"))
+//                        .httpStrictTransportSecurity(hsts -> hsts
+//                                .includeSubDomains(true)
+//                                .maxAgeInSeconds(31536000))
+//                        .contentSecurityPolicy(csp -> csp
+//                                .policyDirectives("default-src 'self'"))
 //                )
+//                .authorizeHttpRequests(requests -> {
+//                    // Swagger UI cho phép ở môi trường dev
+//                    if (environment.acceptsProfiles(Profiles.of("dev"))) {
+//                        requests.requestMatchers(SWAGGER_ENDPOINTS).permitAll();
+//                    } else {
+//                        requests.requestMatchers(SWAGGER_ENDPOINTS).denyAll();
+//                    }
+//
+//                    // Cho phép các endpoint xác thực không cần token
+//                    requests
+//                            .requestMatchers(HttpMethod.POST, AUTH_ENDPOINTS).permitAll()
+//                            .anyRequest().authenticated();
+//                })
 //                .oauth2ResourceServer(oauth2 -> oauth2
-//                        .jwt(jwt -> jwt.decoder(jwtDecoder())
+//                        .jwt(jwt -> jwt
+//                                .decoder(jwtDecoder())
 //                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
 //                        .authenticationEntryPoint(customAuthenticationEntryPoint)
 //                );
+//
 //        return httpSecurity.build();
 //    }
 //    @Override
 //    public void addCorsMappings(CorsRegistry registry) {
 //        registry.addMapping("/**")
-//                .allowedOrigins("http://localhost:8386")
+//                .allowedOrigins("http://localhost:8080")
 //                .allowedMethods("GET", "POST", "PUT", "DELETE")
 //                .allowedHeaders("Authorization", "Content-Type")
 //                .allowCredentials(true);
 //    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {    //get error
         httpSecurity

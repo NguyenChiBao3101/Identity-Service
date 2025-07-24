@@ -13,8 +13,10 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
+@Profile("dev")
 public class OpenAPIConfig {
 
     @Bean
