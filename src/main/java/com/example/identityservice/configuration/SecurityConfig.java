@@ -52,74 +52,74 @@ public class SecurityConfig implements WebMvcConfigurer {
             "/auth/refresh",
             "/auth/logout"
     };
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-//        httpSecurity
-//                .csrf(AbstractHttpConfigurer::disable)
-//                .headers(headers -> headers
-//                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
-//                        .httpStrictTransportSecurity(hsts -> hsts
-//                                .includeSubDomains(true)
-//                                .maxAgeInSeconds(31536000))
-//                        .contentSecurityPolicy(csp -> csp
-//                                .policyDirectives("default-src 'self'"))
-//                )
-//                .authorizeHttpRequests(requests -> {
-//                    // Swagger UI cho phép ở môi trường dev
-//                    if (environment.acceptsProfiles(Profiles.of("dev"))) {
-//                        requests.requestMatchers(SWAGGER_ENDPOINTS).permitAll();
-//                    } else {
-//                        requests.requestMatchers(SWAGGER_ENDPOINTS).denyAll();
-//                    }
-//
-//                    // Cho phép các endpoint xác thực không cần token
-//                    requests
-//                            .requestMatchers(HttpMethod.POST, AUTH_ENDPOINTS).permitAll()
-//                            .anyRequest().authenticated();
-//                })
-//                .oauth2ResourceServer(oauth2 -> oauth2
-//                        .jwt(jwt -> jwt
-//                                .decoder(jwtDecoder())
-//                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-//                        .authenticationEntryPoint(customAuthenticationEntryPoint)
-//                );
-//
-//        return httpSecurity.build();
-//    }
-//    @Override
-//    public void addCorsMappings(CorsRegistry registry) {
-//        registry.addMapping("/**")
-//                .allowedOrigins("http://localhost:8080")
-//                .allowedMethods("GET", "POST", "PUT", "DELETE")
-//                .allowedHeaders("Authorization", "Content-Type")
-//                .allowCredentials(true);
-//    }
-
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {    //get error
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {          //fixed
         httpSecurity
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
-                        .requestMatchers(HttpMethod.POST, AUTH_ENDPOINTS).permitAll()
-                        .anyRequest().permitAll()
-                )
                 .csrf(AbstractHttpConfigurer::disable)
-                .headers(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::deny)
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000))
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("default-src 'self'"))
+                )
+                .authorizeHttpRequests(requests -> {
+                    // Swagger UI cho phép ở môi trường dev
+                    if (environment.acceptsProfiles(Profiles.of("dev"))) {
+                        requests.requestMatchers(SWAGGER_ENDPOINTS).permitAll();
+                    } else {
+                        requests.requestMatchers(SWAGGER_ENDPOINTS).denyAll();
+                    }
+
+                    // Cho phép các endpoint xác thực không cần token
+                    requests
+                            .requestMatchers(HttpMethod.POST, AUTH_ENDPOINTS).permitAll()
+                            .anyRequest().authenticated();
+                })
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.decoder(jwtDecoder())
+                        .jwt(jwt -> jwt
+                                .decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
                 );
+
         return httpSecurity.build();
     }
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("*")
-                .allowedMethods("*")
-                .allowedHeaders("*")
+                .allowedOrigins("http://localhost:8080")
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("Authorization", "Content-Type")
                 .allowCredentials(true);
     }
+
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {    //get error
+//        httpSecurity
+//                .authorizeHttpRequests(request -> request
+//                        .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
+//                        .requestMatchers(HttpMethod.POST, AUTH_ENDPOINTS).permitAll()
+//                        .anyRequest().permitAll()
+//                )
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .headers(AbstractHttpConfigurer::disable)
+//                .oauth2ResourceServer(oauth2 -> oauth2
+//                        .jwt(jwt -> jwt.decoder(jwtDecoder())
+//                                .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+//                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+//                );
+//        return httpSecurity.build();
+//    }
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOriginPatterns("*")
+//                .allowedMethods("*")
+//                .allowedHeaders("*")
+//                .allowCredentials(true);
+//    }
 
     @Bean
     JwtDecoder jwtDecoder() {
