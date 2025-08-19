@@ -17,6 +17,7 @@ jobs:
   - type: spider
     parameters:
       context: identity-api
+      url: http://localhost:8080/api-docs
       maxDuration: 2
 
   - type: passiveScan-wait
