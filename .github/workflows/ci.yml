@@ -73,7 +73,11 @@ jobs:
             -v ${{ github.workspace }}/zap:/zap/wrk \
             ghcr.io/zaproxy/zaproxy:stable \
             zap.sh -addoninstall openapi \
-            -cmd -autorun /zap/wrk/zap-automation.yml
+            -cmd -port 8090 \
+            -config api.key=$ZAP_API_KEY \
+            -config api.addrs.addr.name=127.0.0.1 \
+            -config api.addrs.addr.regex=false \
+            -autorun /zap/wrk/zap-automation.yml
 
       - name: Copy ZAP Report
         run: cp zap/zap-report.html ./zap-report.html
