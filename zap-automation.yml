@@ -1,0 +1,33 @@
+env:
+  contexts:
+    - name: identity-api
+      urls:
+        - http://localhost:8080
+
+parameters:
+  failOnError: true
+  progressToStdout: true
+
+jobs:
+  - type: openapi
+    parameters:
+      targetUrl: http://localhost:8080
+      apiUrl: http://localhost:8080/api-docs
+
+  - type: spider
+    parameters:
+      context: identity-api
+      maxDuration: 2
+
+  - type: passiveScan-wait
+
+  - type: activeScan
+    parameters:
+      policy: Default Policy
+
+  - type: report
+    parameters:
+      template: traditional-html
+      reportTitle: ZAP API Scan
+      reportDir: /zap/wrk
+      reportFile: zap-report.html

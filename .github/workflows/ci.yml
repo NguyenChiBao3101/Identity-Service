@@ -57,6 +57,14 @@ jobs:
       - name: Print Spring Boot log
         run: cat spring.log || true
 
+      - name: Prepare zap folder
+        run: |
+          mkdir -p zap
+          cp zap-automation.yml zap/
+
+      - name: Debug zap dir
+        run: ls -la zap
+
       - name: Run ZAP Automation Framework via Docker
         run: |
           docker run --rm \
@@ -64,17 +72,14 @@ jobs:
             --user 0 \
             -v ${{ github.workspace }}/zap:/zap/wrk \
             ghcr.io/zaproxy/zaproxy:stable \
-            zap.sh -addoninstall scripts -addoninstall openapi \
+            zap.sh -addoninstall openapi \
             -cmd -autorun /zap/wrk/zap-automation.yml
+
+      - name: Copy ZAP Report
+        run: cp zap/zap-report.html ./zap-report.html
 
       - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
           path: zap/zap-report.html
-
-      - name: Upload ZAP Script Log
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-script-log
-          path: zap/scan-log.txt
