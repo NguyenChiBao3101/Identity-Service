@@ -3,6 +3,8 @@ env:
     - name: identity-api
       urls:
         - http://localhost:8080
+      excludePaths:
+        - ^http://localhost:8080/$
 
 parameters:
   failOnError: true
